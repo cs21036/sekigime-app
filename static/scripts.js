@@ -13,6 +13,19 @@ window.onload = function() {
     renderMemberList(); // ★追加
 }
 
+function toggleSegment(btn, groupName) {
+    // 1. そのグループのボタンを全部探す
+    // (親要素 .segmented-control の中にあるボタンを探す)
+    const parent = btn.parentElement;
+    const buttons = parent.querySelectorAll('.segment-btn');
+
+    // 2. 全部「非アクティブ」にする
+    buttons.forEach(b => b.classList.remove('active'));
+
+    // 3. 押されたボタンだけ「アクティブ」にする
+    btn.classList.add('active');
+}
+
 // --- モーダル関連 (変更なし) ---
 // ■ 一括入力モーダルを開く
 function openBulkModal() {
@@ -275,99 +288,287 @@ function updateStatus() {
     // 右カラムのメッセージも変えちゃいましょうか？（後で）
 }
 
+// ★追加: 直前の結果データを保存しておく変数
+let lastResultData = null;
+
+// ■ 1. メインボタンが押された時の判断役
+function handleMainAction() {
+    // すでに結果があるなら、APIを叩かずにオーバーレイを開くだけ
+    if (lastResultData !== null) {
+        showResultOverlay();
+        return;
+    }
+    
+    // 結果がないなら、計算を実行する
+    executeShuffle();
+}
+
+// ■ 2. 強制的に再抽選する（再抽選ボタン用）
+function forceReshuffle() {
+    if(!confirm("現在の結果を破棄して、作り直しますか？")) return;
+    executeShuffle();
+}
 // --- 実行関数 ---
 // ■ 席決め実行関数
+// --- 実行関数 ---
+// ■ 3. 実際にAPIを叩く関数 (旧 shuffleSeats)
 async function executeShuffle() {
-    const placeholder = document.getElementById("result-placeholder");
-    const resultContent = document.getElementById("result-content");
-    const resultList = document.getElementById("result-list");
+    // 設定値の取得
+    const algoBtn = document.querySelector('button[onclick*="algo"].active');
+    const apiMode = algoBtn ? algoBtn.getAttribute('data-value') : "balanced";
 
     // バリデーション
     if (memberList.length === 0) { alert("参加者がいません"); return; }
     if (currentTableConfig.length === 0) { alert("テーブルを追加してください"); return; }
 
-    // 通信中の表示
-    resultList.innerHTML = "<p style='text-align:center; padding:20px;'>抽選中...</p>";
-    placeholder.style.display = "none";
-    resultContent.style.display = "block";
+    const totalSeats = currentTableConfig.reduce((a, b) => a + b, 0);
+    if (memberList.length > totalSeats) {
+        if (!confirm(`席数が足りませんが実行しますか？`)) return;
+    }
+
+    // オーバーレイを開いて「抽選中」表示
+    document.getElementById("result-overlay").style.display = "block";
+    document.body.style.overflow = "hidden"; // 裏スクロール禁止
+    const resultArea = document.getElementById("result-area");
+    resultArea.innerHTML = "<p style='text-align:center; margin-top:50px; font-size:1.5rem;'>🎲 抽選中...</p>";
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ members: memberList, table_capacities: currentTableConfig })
+            body: JSON.stringify({ 
+                members: memberList, 
+                table_capacities: currentTableConfig,
+                mode: apiMode 
+            })
         });
 
         if (!response.ok) throw new Error("サーバーエラー");
-        const data = await response.json();
-
-        // --- 結果HTMLの生成 ---
-        let html = "";
         
-        data.tables.forEach(table => {
-            const tableName = String.fromCharCode(65 + (table.table_no - 1)); // A, B, C...
-            
-            html += `
-                <div class="result-card">
-                    <div class="result-header">
-                        <i>田</i> テーブル ${tableName}
-                    </div>
-                    <div class="result-members">
-                        ${table.members.map((name, i) => `
-                            <div class="result-member-row">
-                                <span class="result-num">${i + 1}</span>
-                                <span>${name}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        });
+        // ★重要: 結果を変数に保存！
+        lastResultData = await response.json();
 
-        // あぶれた人
-        if (data.waiting_list.length > 0) {
-            html += `
-                <div class="result-card" style="border-color: var(--del-color);">
-                    <div class="result-header" style="background-color: #ffebee; color: var(--del-color);">
-                        <i>⚠️</i> あぶれた人 / 待機
-                    </div>
-                    <div class="result-members">
-                        ${data.waiting_list.map((name, i) => `
-                            <div class="result-member-row">
-                                <span class="result-num" style="background:#ffcdd2; color:#c62828;">${i + 1}</span>
-                                <span>${name}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        resultList.innerHTML = html;
+        // 画面を描画
+        renderResultContent();
+        
+        // ★重要: ボタンの状態を更新（「席を決める」→「結果を見る」へ）
+        updateButtonState();
 
     } catch (error) {
         console.error(error);
         alert("エラーが発生しました");
-        placeholder.style.display = "block";
-        resultContent.style.display = "none";
+        closeResult();
     }
+}
+
+// ■ 保存されたデータを使って描画する関数
+function renderResultContent() {
+    if (!lastResultData) return;
+
+    const resultArea = document.getElementById("result-area");
+    const viewBtn = document.querySelector('button[onclick*="view"].active');
+    const viewMode = viewBtn ? viewBtn.getAttribute('data-value') : "visual";
+
+    if (viewMode === "visual") {
+        renderVisualResult(lastResultData, resultArea);
+    } else {
+        renderListResult(lastResultData, resultArea);
+    }
+}
+// ■ オーバーレイを開くだけの関数
+function showResultOverlay() {
+    document.getElementById("result-overlay").style.display = "block";
+    document.body.style.overflow = "hidden";
+    
+    // 表示モード（座席表/リスト）が変わっているかもしれないので再描画
+    renderResultContent();
+}
+
+// ■ オーバーレイを閉じる
+function closeResult() {
+    document.getElementById("result-overlay").style.display = "none";
+    document.body.style.overflow = "";
+}
+
+
+// ---------------------------------------------------------
+// 🎨 モードA: 座席表ビュー (机と椅子の図)
+// ---------------------------------------------------------
+function renderVisualResult(data, targetElement) {
+    let html = "<div class='visual-table-container'>";
+    
+    data.tables.forEach(table => {
+        const tableName = String.fromCharCode(65 + (table.table_no - 1)); // A, B, C...
+        const members = table.members; // [{name: "A", grade: "M1"}, ...]
+        
+        // 机の幅計算 (基本170px + 追加分)
+        const halfCount = Math.ceil(members.length / 2);
+        const deskWidth = 170 + (Math.max(0, halfCount - 1) * 130);
+
+        // 上半分の席
+        const topMembers = members.slice(0, halfCount);
+        let topHtml = `<div style="display:flex; gap:20px; margin-bottom:-25px; z-index:2; justify-content: center; width: 100%;">`;
+        topMembers.forEach((m, i) => {
+            topHtml += `
+                <div class="visual-seat">
+                    <span class="seat-number" style="top:5px; left:5px;">${i + 1}</span>
+                    <div class="seat-name">${m.name}</div>
+                    <div class="seat-grade">${m.grade}</div>
+                </div>`;
+        });
+        topHtml += `</div>`;
+
+        // 下半分の席
+        const bottomMembers = members.slice(halfCount);
+        let bottomHtml = `<div style="display:flex; gap:20px; margin-top:-25px; z-index:2; justify-content: center; width: 100%;">`;
+        bottomMembers.forEach((m, i) => {
+            bottomHtml += `
+                <div class="visual-seat">
+                    <span class="seat-number" style="top:5px; left:5px;">${halfCount + i + 1}</span>
+                    <div class="seat-name">${m.name}</div>
+                    <div class="seat-grade">${m.grade}</div>
+                </div>`;
+        });
+        bottomHtml += `</div>`;
+
+        // 合体
+        html += `
+            <div class="visual-table-wrapper">
+                ${topHtml}
+                <div class="visual-desk" style="width: ${deskWidth}px;">Table ${tableName}</div>
+                ${bottomHtml}
+            </div>
+        `;
+    });
+    html += "</div>"; // container close
+
+    // あぶれた人の表示
+    if (data.waiting_list.length > 0) {
+        html += renderWaitingList(data.waiting_list);
+    }
+
+    targetElement.innerHTML = html;
+}
+
+
+// ---------------------------------------------------------
+// 📋 モードB: リストビュー (文字だけのシンプルな表)
+// ---------------------------------------------------------
+function renderListResult(data, targetElement) {
+    // Pico.cssのグリッドでカードを並べる
+    let html = "<div class='grid'>"; 
+    
+    data.tables.forEach(table => {
+        const tableName = String.fromCharCode(65 + (table.table_no - 1));
+        
+        // デザイン済みの .result-card を再利用してリストを作る
+        html += `
+            <div class="result-card">
+                <div class="result-header">
+                    <i>田</i> テーブル ${tableName} (${table.members.length}人)
+                </div>
+                
+                <div class="result-members">
+                    ${table.members.map((m, i) => `
+                        <div class="result-member-row">
+                            <span class="result-num">${i + 1}</span>
+                            
+                            <span style="background:#eee; padding:2px 8px; border-radius:4px; font-size:0.8rem; color:#555; margin-right:8px; font-weight:bold;">
+                                ${m.grade}
+                            </span>
+                            
+                            <span style="font-weight:bold;">${m.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    html += "</div>"; // grid close
+
+    // あぶれた人の表示
+    if (data.waiting_list.length > 0) {
+        html += renderWaitingList(data.waiting_list);
+    }
+
+    targetElement.innerHTML = html;
+}
+
+
+// ■ 共通部品: あぶれた人リストの生成
+function renderWaitingList(waitingList) {
+    // waitingList は ["名前", "名前"] という文字列リストの想定
+    // (main.pyの実装によっては辞書かもしれないので注意。今回は文字列リストとして処理)
+    return `
+        <hr>
+        <div class="result-card" style="border-color: var(--del-color); margin-top: 30px;">
+            <div class="result-header" style="background-color: #ffebee; color: var(--del-color);">
+                <i>⚠️</i> あぶれた人 / 待機 (${waitingList.length}人)
+            </div>
+            <div class="result-members" style="display: flex; gap: 10px; flex-wrap: wrap; padding: 15px;">
+                ${waitingList.map(name => `
+                    <span style="background:white; padding:8px 12px; border:1px solid #ffcdd2; border-radius:6px; font-weight:bold; color:#c62828;">
+                        ${name}
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+    `;
 }
 
 
 // ■ 全リセット関数
+// ■ 全リセット関数 (修正)
 function resetAll() {
-    if(!confirm("テーブル設定とメンバー入力、すべてリセットしますか？")) return;
+    if(!confirm("すべてリセットしますか？")) return;
     
-    // 変数をクリア
+    // データクリア
     currentTableConfig = [];
     memberList = [];
+    lastResultData = null; // ★結果も消す
     
-    // 画面を更新
+    // 画面更新
     renderTableList();
     renderMemberList();
     updateStatus();
+    updateButtonState(); // ★ボタンも元に戻す
     
-    // 結果エリアを隠して初期画面に戻す
-    document.getElementById("result-placeholder").style.display = "block";
-    document.getElementById("result-content").style.display = "none";
+    closeResult();
+}
+
+function updateButtonState() {
+    const mainBtn = document.getElementById("main-action-btn");
+    const subBtn = document.getElementById("reshuffle-btn");
+    const msg = document.getElementById("action-message"); // メッセージも取得
+
+    if (lastResultData !== null) {
+        // --- 結果がある時 ---
+        
+        // メインボタン: 「結果を見る」に変身
+        mainBtn.innerHTML = "📂 結果を見る";
+        mainBtn.classList.remove("primary-btn");
+        mainBtn.style.backgroundColor = "#2ecc71"; // 緑色
+        mainBtn.style.border = "none";
+        mainBtn.style.color = "white";
+        
+        // サブボタン: 表示する
+        subBtn.style.display = "block";
+        
+        // メッセージ更新
+        if(msg) msg.innerHTML = "席が決まりました！<br>結果を確認できます";
+
+    } else {
+        // --- 結果がない時（リセット後など） ---
+        
+        // メインボタン: 「席を決定する」に戻す
+        mainBtn.innerHTML = "席を決定する";
+        mainBtn.style.backgroundColor = ""; 
+        mainBtn.classList.add("primary-btn");
+        
+        // サブボタン: 隠す
+        subBtn.style.display = "none";
+        
+        // メッセージ戻す
+        if(msg) msg.innerHTML = "準備ができたら<br>ボタンを押してください";
+    }
 }
