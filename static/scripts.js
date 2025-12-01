@@ -6,12 +6,43 @@ let currentTableConfig = [];
 let selectedCapacity = 4;
 let memberList = [];
 
-window.onload = function() {
-    // 初期化処理
-    updateStatus();
-    renderTableList();
-    renderMemberList(); // ★追加
+// ■ データをブラウザに保存する
+function saveToStorage() {
+    // リストをJSON文字列に変換して保存
+    // キー名は他と被らないように 'sekigime_members' などにする
+    localStorage.setItem('sekigime_members', JSON.stringify(memberList));
+    localStorage.setItem('sekigime_tables', JSON.stringify(currentTableConfig));
 }
+
+// ■ データをブラウザから読み込む
+function loadFromStorage() {
+    const savedMembers = localStorage.getItem('sekigime_members');
+    const savedTables = localStorage.getItem('sekigime_tables');
+
+    if (savedMembers) {
+        memberList = JSON.parse(savedMembers);
+    }
+    
+    if (savedTables) {
+        currentTableConfig = JSON.parse(savedTables);
+    }
+}
+
+window.onload = function() {
+    // ★修正: まず保存データを読み込む
+    loadFromStorage();
+
+    // もし読み込んでもデータが空っぽなら、デフォルトの初期値を入れる
+    if (memberList.length === 0) {
+        // (任意) 最初は空でもいいならこのループは不要
+        // for (let i = 0; i < 6; i++) addMemberRow(""); // 古い関数なので削除済みなら無視
+    }
+    
+    // 画面を更新してデータを反映
+    renderTableList();
+    renderMemberList();
+    updateStatus();
+};
 
 function toggleSegment(btn, groupName) {
     // 1. そのグループのボタンを全部探す
@@ -220,6 +251,8 @@ function addMemberSingle() {
     
     renderMemberList();
     updateStatus();
+
+    saveToStorage();
 }
 
 // 2. メンバーを削除する関数
@@ -553,6 +586,7 @@ function resetAll() {
     updateStatus();
     updateButtonState(); // ★ボタンも元に戻す
     
+    saveToStorage();
     closeResult();
 }
 
