@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  app-server:
+    build: .
+    container_name: sekigime-backend
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - .:/app

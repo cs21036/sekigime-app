@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>席決めアプリ - メニュー</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="icon" href="/static/favicon.png">
+    <style>
+        /* ちょっとしたカスタムCSS: ボタンを大きくする */
+        .menu-button {
+            display: block;
+            width: 100%;
+            padding: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            text-decoration: none; /* リンクの下線を消す */
+            border-radius: 12px;
+            background-color: #34495e;
+            color: white;
+            transition: transform 0.2s;
+        }
+        .menu-button:hover {
+            transform: scale(1.02); /* ホバー時にちょっと浮く */
+            background-color: #2c3e50;
+            color: white;
+        }
+        .menu-button.quick { background-color: #e67e22; } /* オレンジ */
+        .menu-button.custom { background-color: #2980b9; } /* 青 */
+    </style>
+</head>
+<body>
+    <main class="container">
+        <h1 style="text-align: center;">🪑 席決めモード選択</h1>
+        <p style="text-align: center;">遊び方を選んでください</p>
+
+        <a href="/static/quick.html" class="menu-button quick">
+            <strong>⏱️ クイックモード</strong><br>
+            <small style="font-size: 0.6em;">どのテーブルに座るか</small>
+        </a>
+
+        <a href="/static/custom.html" class="menu-button custom">
+            <strong>🎨 カスタマイズモード</strong><br>
+            <small style="font-size: 0.6em;">どこに座るかまで細かく決定！</small>
+        </a>
+    </main>
+</body>
+</html>

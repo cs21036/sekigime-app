@@ -1,0 +1,663 @@
+/* --- static/style.css --- */
+
+/* :root で Pico.css の変数を上書きして、配色を変更します */
+:root {
+    /* メインカラー（Readyの紫色） */
+    --primary: #5e5ce6;
+    --primary-hover: #4a48b8;
+    --primary-focus: rgba(94, 92, 230, 0.125);
+    --primary-inverse: #ffffff;
+
+    /* 背景色系 */
+    --background: #f2f2f7;       /* 全体の背景（薄いグレー） */
+    --card-background: #ffffff;  /* カードの背景（白） */
+    --muted-color: #8e8e93;      /* 薄い文字色 */
+    --border-color: #e5e5ea;     /* 枠線の色 */
+
+    /* 削除ボタンなどの赤色 */
+    --del-color: #ff3b30;
+
+    /* 角丸の強さ */
+    --border-radius: 12px;
+
+    /* フォント（お好みで。Mac/iOSっぽい感じに） */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 全体の設定 */
+body {
+    background-color: var(--background);
+    color: #1c1c1e;
+    font-family: var(--font-family);
+}
+
+/* メインコンテナの余白調整 */
+main.container {
+    padding-top: 30px;
+    padding-bottom: 30px;
+    max-width: 1200px; /* PCで見やすいように幅を制限 */
+}
+
+/* h1（アプリタイトル）のデザイン */
+h1 {
+    text-align: center;
+    font-weight: 800;
+    color: #1c1c1e;
+    margin-bottom: 10px;
+}
+h1 span { color: var(--primary); } /* 「席決めアプリ」の「✕」みたいなロゴ部分用 */
+
+/* サブタイトル */
+hgroup h2 {
+    text-align: center;
+    color: var(--muted-color);
+    font-size: 1rem;
+    margin-bottom: 40px;
+}
+
+/* --- カード（セクション）のデザイン --- */
+/* Readyのように白い箱で囲むスタイルにします */
+article.card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* ほんのり影をつける */
+    padding: 25px;
+    border: none; /* Picoのデフォルト枠線を消す */
+    margin-bottom: 30px;
+
+}
+
+.settings-container label, 
+.settings-container small {
+    padding-left: 10px; /* 左に10pxの隙間 */
+}
+
+/* カード内の見出し (例: 田 テーブル設定) */
+article.card h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #1c1c1e;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+/* 見出しのアイコンを紫色にする */
+article.card h3 i { color: var(--primary); }
+
+
+/* --- ボタンのデザイン調整 --- */
+/* メインの紫色ボタン（追加、決定など） */
+button.primary-btn {
+    background-color: var(--primary);
+    border: none;
+    font-weight: bold;
+    padding: 12px 20px;
+    width: 100%; /* スマホで押しやすいように全幅 */
+}
+button.primary-btn:hover { background-color: var(--primary-hover); }
+
+/* --- その他の調整 --- */
+hr { border-color: var(--border-color); }
+
+/* 薄い紫色の背景（合計表示や、リストアイテムの背景に使用） */
+.bg-purple-light {
+    background-color: #f2f2fd; /* Readyっぽい薄い紫 */
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/* アイコン付きの四角いバッジ（テーブルアイコンなど） */
+.icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #dce0ff; /* 濃いめの薄紫 */
+    color: var(--primary);
+    border-radius: 8px;
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+/* リストアイテム（追加されたテーブルやメンバーの1行） */
+.list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 両端揃え */
+    background-color: var(--card-background); /* 白背景 */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+/* リストアイテム内の左側（アイコンとテキスト） */
+.list-item-left {
+    display: flex;
+    align-items: center;
+}
+/* リストアイテム内のサブテキスト（「4人席」など） */
+.list-item-sub {
+    font-size: 0.85rem;
+    color: var(--muted-color);
+}
+
+/* 赤い削除アイコンボタン */
+.delete-icon-btn {
+    /* 強制的にサイズを絞る */
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    
+    background: transparent !important; /* 背景透明 */
+    border: none !important;
+    color: var(--del-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    
+    /* 上下左右中央寄せ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.delete-icon-btn:hover {
+    background-color: rgba(255, 59, 48, 0.1) !important; /* ホバー時にうっすら赤く */
+    border-radius: 50%;
+}
+
+/* 人数選択ボタンのグリッド（2列表示） */
+.capacity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2列 */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+/* 人数選択の個別ボタン（薄いグレー） */
+.capacity-btn {
+    background-color: var(--background); /* 薄グレー */
+    color: #1c1c1e;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+/* 選択された状態のボタン（紫色） */
+.capacity-btn.selected {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* ステータスバー（合計席数 / 現在人数） */
+.status-bar {
+    background-color: #f2f2fd; /* 薄い紫 */
+    color: var(--primary);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+/* 入力エリア（入力欄 + 追加ボタン） */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    width: 100%; /* 親要素いっぱいに広げる */
+}
+
+/* 入力欄 */
+.input-group input {
+    flex: 1; /* 余ったスペースを全部使う */
+    margin-bottom: 0 !important;
+    min-width: 0; /* フレックスボックスでのはみ出し防止のおまじない */
+}
+
+/* 追加ボタン */
+.input-group button {
+    flex: 0 0 auto; /* 文字数に合わせて幅を自動調整し、縮ませない */
+    width: auto !important;
+    white-space: nowrap; /* 文字を折り返さない */
+    margin-bottom: 0 !important;
+}
+
+/* メンバーリストのアイテム（番号バッジ付きのカード） */
+.member-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+}
+
+/* 番号バッジ（紫色の丸） */
+.num-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: #f2f2fd;
+    color: var(--primary);
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* 結果表示エリアのプレースホルダー（初期状態） */
+.result-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted-color);
+}
+.result-placeholder-icon {
+    font-size: 3rem;
+    color: #dce0ff; /* 薄い紫 */
+    margin-bottom: 20px;
+}
+
+/* 結果カード（各テーブル） */
+.result-card {
+    border: 2px solid #e5e5ea; /* 薄い枠線 */
+    border-radius: 12px;
+    padding: 0; /* 中身でpaddingする */
+    margin-bottom: 15px;
+    overflow: hidden; /* 角丸からはみ出さないように */
+    background: white;
+}
+
+/* 結果カードのヘッダー（テーブル名） */
+.result-header {
+    background-color: #f2f2fd; /* 薄い紫 */
+    padding: 10px 15px;
+    font-weight: bold;
+    color: #1c1c1e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.result-header i { color: var(--primary); }
+
+/* 結果カードのメンバーリスト */
+.result-members {
+    padding: 10px;
+}
+.result-member-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 5px;
+}
+/* メンバー名の横の番号 */
+.result-num {
+    background-color: #f0f0f5;
+    color: var(--primary);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* 再抽選・リセットボタンエリア */
+.action-buttons {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* 2:1 の比率 */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* モーダル（一括入力）のサイズ調整 */
+dialog article {
+    width: 100% !important;
+    max-width: 1000px !important; /* 800px -> 1000px に拡大 */
+    
+    /* 上下の余白も調整して画面いっぱい使えるようにする */
+    margin-top: 5vh;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* 1. モーダルのヘッダー（青い帯）をスリムにする */
+dialog article header {
+    padding: 15px 20px !important; /* 上下の余白を減らす（デフォルトはもっと広い） */
+    margin-bottom: 10px !important; /* 下の要素との隙間も減らす */
+}
+
+/* ヘッダー内の文字（h3）の余白も消す */
+dialog article header h3 {
+    margin-bottom: 0 !important;
+    font-size: 1.3rem; /* 文字サイズも少し控えめに */
+}
+
+/* 2. テキストエリアとフッター（ボタン）の隙間を詰める */
+#bulk-textarea {
+    margin-bottom: 10px !important; /* テキストエリアの下の余白を減らす */
+}
+
+/* フッターの余白調整 */
+dialog article footer {
+    margin-top: 0 !important;      /* 上の余白を消す */
+    padding-top: 10px !important;  /* 内側の余白を少しだけ確保 */
+}
+#new-member-name {
+        /* 残りのスペースを埋める設定 */
+        flex: 1 !important; 
+        
+        /* 幅は自動計算させる */
+        width: auto !important; 
+        
+        /* ★修正: 最低でも120pxは確保する！(これで潰れなくなります) */
+        min-width: 120px !important; 
+}
+@media screen and (max-width: 1000px) {
+    
+    /* 1. 全体の基準サイズを大きくする (16px -> 18px) */
+    /* これでアプリ内のすべての文字が一回り大きくなります */
+    html {
+        font-size: 32px !important; 
+    }
+
+    /* 2. 特に「見出し」や「説明文」をさらに強調して大きくする */
+    article.card h3 {
+        font-size: 1.8rem !important; /* アイコン付き見出しを大きく */
+    }
+    article.card p {
+        font-size: 1.4rem !important; /* 「メンバー名を入力」などの説明文を大きく */
+    }
+    /* 追加されたリストの文字も大きく */
+    .list-item, .member-card {
+        font-size: 1.4rem !important;
+    }
+
+    /* 3. 入力時のズーム防止 & 操作しやすさ */
+    input, select, textarea, button {
+        font-size: 40px !important; /* 16px以上ならズームしません */
+    }
+    
+    /* 4. 高さ調整（指で押しやすく） */
+    input, select, .remove-btn, .delete-icon-btn {
+        height: 54px !important; 
+        min-height: 54px !important;
+    }
+    
+    #new-member-grade {
+        /* 幅の固定 */
+        flex: 0 0 150px !important;
+        width: 150px !important;
+        max-width: 150px !important;
+        
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        
+        /* 左右の余白 */
+        padding-right: 25px !important; /* 矢印用 */
+        padding-left: 8px !important;   /* 左詰め */
+        
+        /* その他の設定 */
+        text-align: left !important;
+        text-indent: 0 !important;
+        font-size: 32px !important;
+        color: #333 !important;
+        background-color: #fff !important;
+        
+        /* 高さを明示 */
+        height: 54px !important;
+        line-height: 54px !important; /* 行の高さを揃えて垂直中央にする */
+    }
+
+    #new-member-name {
+        /* 残りのスペースを埋める設定 */
+        flex: 1 !important; 
+        
+        /* 幅は自動計算させる */
+        width: auto !important; 
+        
+        /* ★修正: 最低でも120pxは確保する！(これで潰れなくなります) */
+        min-width: 120px !important; 
+    }
+
+    /* 矢印と被る原因は、余白不足 -> 余白をガッツリ広げる */
+    select[onchange*="updateMemberGrade"] {
+        width: auto !important;
+        min-width: 90px !important;
+        
+        /* 矢印(▼)との被りを防ぐために、右余白をたっぷり取る */
+        padding-right: 50px !important; 
+        padding-left: 10px !important;
+
+        /* 見た目を整える */
+        font-weight: bold !important;
+        color: #5e5ce6 !important;
+        background-color: #f2f2fd !important;
+    }
+
+    /* 6. 結果表示の文字も大きく */
+    .result-header, .result-member-row {
+        font-size: 1.4rem !important;
+    }
+    .delete-icon-btn svg, 
+    .remove-btn svg {
+        width: 40px !important;  /* デフォルト20px -> 40pxに拡大 */
+        height: 40px !important;
+    }
+
+    /* 8. モーダル（一括入力）の説明文を大きくする */
+    /* Pico.cssのデフォルトで小さくなっているので、強制的に大きくします */
+    dialog article p {
+        font-size: 1.4rem !important; /* 他のテキストと同じくらいのバランスに */
+        margin-bottom: 20px !important;
+    }
+    
+    /* ついでにテキストエリアの文字も大きくしておくと見やすいです */
+    #bulk-textarea {
+        font-size: 1.4rem !important;
+        line-height: 1.6 !important;
+    }
+}
+
+/* 1. 座席表エリア全体 */
+.visual-table-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px; /* テーブル同士の間隔をさらに広げる */
+    justify-content: center;
+    padding: 30px;
+}
+
+/* 2. ひとつのテーブルセット */
+.visual-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 3. 机（真ん中の四角） */
+.visual-desk {
+    background-color: #d1d5db;
+    border-radius: 6px;
+    color: #555;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    
+    /* ★重要: ここで width を指定しない！（JSに任せる） */
+    /* width: 200px;  <-- これがあるとJSが効かないので消す */
+    
+    min-width: 120px; /* 最小幅だけ決めておく */
+    height: 100px;    /* 奥行きも少しアップ */
+    margin: 30px 0;   /* 椅子との隙間 */
+    z-index: 1;
+    
+    /* 影をつけて立体感を出す */
+    box-shadow: 0 4px 0 #9ca3af; 
+}
+
+/* 椅子 */
+.visual-seat {
+    /* ★修正: 円(50%)をやめて、角丸の四角にする */
+    border-radius: 12px; 
+    
+    /* ★修正: 名前が入るように横長にする */
+    width: 110px;
+    height: 80px;
+    
+    background-color: #93c5fd; 
+    border: 3px solid #fff;
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0px; /* 隙間を詰める */
+    
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+
+    padding-top: 12px;
+    box-sizing: border-box;
+}
+
+/* 名前 */
+.seat-name {
+    width: 100%;
+    padding: 0 2px; /* 横の余白を確保 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    
+    color: #1e3a8a;
+    font-size: 0.65rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    letter-spacing: -0.02em;
+}
+
+/* 学年（さらに小さく控えめに） */
+.seat-grade {
+    /* ★修正: 極限まで小さくシンプルに */
+    font-size: 0.6rem;
+    line-height: 1;
+    margin-top: 3px;
+    
+    background-color: rgba(255, 255, 255, 0.6); /* 背景を薄く */
+    color: #1e3a8a;
+    padding: 1px 6px;
+    border-radius: 4px;
+}
+
+/* 席番号（左上のバッジ）は丸いデザインだと邪魔かも？
+   一旦非表示にするか、配置を変える */
+.seat-number {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background-color: var(--primary);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 設定エリアのコンテナ */
+.settings-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* PCでは2列 */
+    gap: 20px;
+}
+
+/* 個別の設定項目 */
+/* 外枠（グレーの背景） */
+.segmented-control {
+    display: flex;
+    background-color: #f2f2f7;
+    padding: 5px; /* 内側の隙間を少し増やす */
+    border-radius: 10px;
+    width: 100%;
+    margin-top: 10px;
+    
+    /* 高さ制限をなくして、中身のボタンに合わせる */
+    height: auto;
+}
+
+/* 中のボタン */
+.segment-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: #8e8e93;
+    font-weight: bold;
+    padding: 0; /* パディングは高さで制御 */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    /* ★修正: 高さを54pxに拡大（他の入力欄と揃える） */
+    height: 60px !important;
+    min-height: 60px !important;
+    
+    /* ★修正: 文字サイズも大きく */
+    font-size: 1rem !important;
+    
+    /* フレックスで文字をど真ん中に */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    margin-bottom: 0 !important;
+}
+
+/* 選ばれた状態 */
+.segment-btn.active {
+    background-color: var(--primary); /* 紫 */
+    color: white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* 影を少し強く */
+}
+
+/* スマホでの調整 */
+@media screen and (max-width: 1000px) {
+    .segment-btn {
+        font-size: 32px !important; /* 16px確保 */
+        
+        /* スマホなら文字を少し詰めたり、改行を許可したりしてもいいかも */
+        white-space: nowrap;
+    }
+
+    article.card label,
+    article.card small {
+        padding-left: 30px !important; /* 左に少し隙間を作る */
+        display: block; /* ブロック要素にして余白を効かせる */
+    }
+
+    /* ついでに注釈（※）は改行されやすいので、少し行間を広げておく */
+    article.card small {
+        line-height: 1.4;
+        margin-top: 8px !important;
+    }
+}

@@ -1,0 +1,10 @@
+<select id="seat-select">
+            <option value="2">2人掛け</option>
+            <option value="3">3人掛け</option>
+            <option value="4" selected>4人掛け</option> <option value="5">5人掛け</option>
+            <option value="6">6人掛け</option>
+            <option value="7">7人掛け</option>
+            <option value="8">8人掛け</option>
+            <option value="10">10人掛け</option>
+</select>
+

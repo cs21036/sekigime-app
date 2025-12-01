@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
+    <title>席決めアプリ</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="icon" href="/static/favicon.png">
+</head>
+<body>
+<main class="container">
+    <hgroup>
+        <h1>⏱️　クイックモード</h1>
+        <h2>テーブル構成とメンバーを設定して、ランダムに席を決めよう</h2>
+    </hgroup>
+
+    <div class="grid">
+        <article class="card">
+
+            <div>
+                <p style="font-weight: bold; margin-bottom: 10px;">割り振りルール</p>
+                <div class="segmented-control">
+                    <button type="button" class="segment-btn active" onclick="toggleSegment(this, 'algo')" data-value="balanced">
+                        ⚖️ 学年バランス
+                    </button>
+                    <button type="button" class="segment-btn" onclick="toggleSegment(this, 'algo')" data-value="random">
+                        🎲 完全ランダム
+                    </button>
+                </div>
+                <small style="color: var(--muted-color); display:block; margin-top:5px;">
+                    ※「バランス」は同じ学年が隣り合わないようにします
+                </small>
+            </div>
+
+            <div>
+                <p style="font-weight: bold; margin-bottom: 10px;">結果の表示形式</p>
+                <div class="segmented-control">
+                    <button type="button" class="segment-btn active" onclick="toggleSegment(this, 'view')" data-value="visual">
+                        🪑 座席表
+                    </button>
+                    <button type="button" class="segment-btn" onclick="toggleSegment(this, 'view')" data-value="list">
+                        📋 リスト
+                    </button>
+                </div>
+                <small style="color: var(--muted-color); display:block; margin-top:5px;">
+                    ※「座席表」はどの椅子に座るかまで指定します
+                </small>
+            </div>
+        </article>
+    </div>
+    <div class="grid">
+        <div>
+            <article class="card">
+                <h3><i>田</i> テーブル設定</h3>
+                <div class="bg-purple-light" style="margin-top: 20px; font-weight: bold; color: var(--primary);">
+                    合計： <span id="total-tables">0</span> テーブル / <span id="total-seats">0</span> 席
+                </div>
+                <p style="font-weight: bold; margin-bottom: 10px;">テーブルの人数を選択</p>
+                
+                <div class="capacity-grid" id="capacity-buttons">
+                    <button type="button" class="capacity-btn" onclick="selectCapacity(2)">2人</button>
+                    <button type="button" class="capacity-btn selected" onclick="selectCapacity(4)">4人</button> <button type="button" class="capacity-btn" onclick="selectCapacity(6)">6人</button>
+                    <button type="button" class="capacity-btn" onclick="selectCapacity(8)">8人</button>
+                    <button type="button" class="capacity-btn" onclick="selectCapacity(10)">10人</button>
+                    <button type="button" class="capacity-btn" onclick="selectCapacity(12)">12人</button>
+                </div>
+
+                <button type="button" class="primary-btn" onclick="addTable()" style="margin-bottom: 30px;">
+                    ＋ <span id="selected-capacity-display">4</span>人席を追加
+                </button>
+
+                <p style="font-weight: bold; margin-bottom: 10px;">追加されたテーブル</p>
+
+                <div id="table-list-display"></div>
+
+
+            </article>
+        </div>
+
+        <div>
+            <article class="card">
+                <h3><i>👤</i> メンバー入力</h3>
+                
+                <div class="status-bar">
+                    合計席数：<span id="status-total-seats">0</span>席 / 
+                    現在：<span id="status-member-count">0</span>人
+                </div>
+
+                <p style="font-weight: bold; margin-bottom: 10px;">メンバー名を入力</p>
+                <div class="input-group">
+                    <input type="text" id="new-member-name" placeholder="名前" 
+                        onkeydown="if(event.key==='Enter') addMemberSingle()"
+                        style="flex: 2;"> <select id="new-member-grade" style="margin-bottom: 0;">
+                        <option value="D3">D3</option>
+                        <option value="D2">D2</option>
+                        <option value="D1">D1</option>
+                        <option value="M2">M2</option>
+                        <option value="M1">M1</option>
+                        <option value="B4" selected>B4</option>
+                        <option value="B3">B3</option>
+                        <option value="他">他</option>
+                    </select>
+
+                    <button class="primary-btn" onclick="addMemberSingle()" style="width: auto;">＋ 追加</button>
+                </div>
+
+                <p style="font-weight: bold; margin-bottom: 10px;">追加されたメンバー</p>
+                
+                <div id="members-list-display" style="max-height: 400px; overflow-y: auto;">
+                    </div>
+
+                <button class="secondary outline" onclick="openBulkModal()" style="width:100%; margin-top:20px;">
+                    📝 まとめて一括入力
+                </button>
+            </article>
+        </div>
+
+        <div>
+    <article class="card" style="min-height: 400px; display: flex; flex-direction: column;">
+        <h3 style="text-align: center; margin-bottom: 20px;"><i>🚀</i> 実行</h3>
+
+            <div style="text-align: center;">
+                <p id="action-message" style="color: var(--muted-color); margin-bottom: 30px;">
+                    準備ができたら<br>ボタンを押してください
+                </p>
+
+                <button id="main-action-btn" class="primary-btn" onclick="handleMainAction()" style="font-size: 1.1rem; padding: 15px; margin-bottom: 15px;">
+                    席を決定する
+                </button>
+
+                <button id="reshuffle-btn" class="secondary outline" onclick="forceReshuffle()" style="width: 100%; display: none;">
+                    🔄 再抽選する
+                </button>
+            </div>
+        
+        <div id="result-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f2f2f7; z-index: 1000; overflow-y: auto;">
+            <div class="container" style="padding-top: 30px; padding-bottom: 50px;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                    <h2>🎉 決定！</h2>
+                    <button class="secondary outline" onclick="closeResult()" style="width: auto;">
+                        ✕ 閉じる
+                    </button>
+                </div>
+
+                <div id="result-area"></div>
+
+                <div class="grid" style="margin-top: 40px;">
+                    <button class="primary-btn" onclick="executeShuffle()">🔄 もう一度シャッフル</button>
+                    <button class="secondary" onclick="closeResult()">✏️ 設定に戻る</button>
+                </div>
+            </div>
+        </div>
+
+    </article>
+</div>
+
+    </div></main>
+
+
+<dialog id="bulk-modal">
+    <article>
+        <header>
+            <h3>📝 一括入力</h3>
+        </header>
+        <p>改行区切りで名前を貼り付けてください</p>
+        <textarea id="bulk-textarea" rows="10" placeholder="Aさん&#13;&#10;Bさん&#13;&#10;Cさん..."></textarea>
+        <footer>
+            <button onclick="applyBulkInput()">反映する</button>
+            <button class="secondary" onclick="closeBulkModal()">キャンセル</button>
+        </footer>
+    </article>
+</dialog>
+
+<script src="/static/scripts_custom.js"></script>
+</body>
+</html>

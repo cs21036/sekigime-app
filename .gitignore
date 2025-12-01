@@ -1,0 +1,10 @@
+# Pythonの一時ファイル
+__pycache__/
+*.pyc
+
+# OSのゴミファイル
+.DS_Store
+Thumbs.db
+
+# VS Codeの設定ファイル（個人設定なので共有しないのが一般的）
+.vscode/
