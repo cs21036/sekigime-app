@@ -26,7 +26,8 @@ function toggleSegment(btn, groupName) {
     btn.classList.add('active');
 }
 
-// --- モーダル関連 (変更なし) ---
+// --- モーダル関連 ---
+const VALID_GRADES = ["D3", "D2", "D1", "M2", "M1", "B4", "B3", "他"];
 // ■ 一括入力モーダルを開く
 function openBulkModal() {
     // ★変更: 名前だけを列挙する（学年情報は混ぜない）
@@ -35,7 +36,7 @@ function openBulkModal() {
     document.getElementById("bulk-textarea").value = text;
     document.getElementById("bulk-modal").setAttribute("open", true);
 }
-// ■ 一括入力を反映する
+// ■ 一括入力を反映する関数 (改良版)
 function applyBulkInput() {
     const text = document.getElementById("bulk-textarea").value;
     
@@ -45,18 +46,37 @@ function applyBulkInput() {
     const lines = text.split("\n");
     
     lines.forEach(line => {
-        const name = line.trim();
-        if (name === "") return;
+        line = line.trim();
+        if (line === "") return;
 
-        // ★変更: 学年の解析はやめる。名前だけ登録し、学年は "B4" 固定。
-        // 区切り文字などを気にする必要なし！
-        memberList.push({ name: name, grade: "B4" });
+        // 1. 区切り文字（カンマ、読点、スペース、タブ）で分割
+        // 例: "田中, M1" -> ["田中", "M1"]
+        // 例: "佐藤"     -> ["佐藤"]
+        const parts = line.split(/[\s,、\t]+/);
+        
+        const name = parts[0];
+        let grade = "B4"; // デフォルト値
+
+        // 2. 学年っぽいものが入力されていた場合
+        if (parts.length > 1) {
+            // 入力を大文字に変換してチェック (例: "m1" -> "M1")
+            const inputGrade = parts[1].toUpperCase();
+            
+            // 有効な学年リストに含まれているか？
+            if (VALID_GRADES.includes(inputGrade)) {
+                grade = inputGrade;
+            }
+            // 含まれていなければデフォルト(B4)のまま
+        }
+
+        memberList.push({ name: name, grade: grade });
     });
     
     closeBulkModal();
     renderMemberList();
     updateStatus();
 }
+
 function closeBulkModal() {
     document.getElementById("bulk-modal").removeAttribute("open");
 }
